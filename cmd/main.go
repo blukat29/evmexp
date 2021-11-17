@@ -1,7 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+
+	"github.com/blukat29/evm-explorer/deco"
+)
 
 func main() {
-	fmt.Println("hello")
+	path := os.Args[1]
+	code, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	d, err := deco.RunWorker(string(code))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(d))
 }
