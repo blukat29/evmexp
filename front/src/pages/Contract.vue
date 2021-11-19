@@ -3,7 +3,7 @@
     <div class="row fit items-start justify-center" style="max-width: 1200px">
 
       <div class="col-12">
-        Contract 0x241343124
+        Contract {{ contractId }}
       </div>
 
       <!-- Code panel -->
@@ -56,16 +56,36 @@
 </style>
 
 <script>
-import * as sampleContract from '../test/eth_usdt.json';
+//import * as sampleContract from '../test/eth_usdt.json';
 import AnsiConverter from 'ansi-to-html';
+import axios from 'axios';
 
 export default {
   name: 'Contract',
   data() {
     return {
       tabCode: "function",
-      contract: sampleContract.contract,
+      contractId: "",
+      contract: {
+        asm: "",
+        pseudocode: "",
+        functions: [],
+      },
     };
+  },
+  created() {
+    var vm = this;
+    vm.contractId = this.$route.params.id;
+
+    axios.get('/api/deco/' + vm.contractId)
+      .then(function(res) {
+        var resJson = res.data.default;
+        vm.contract = resJson.contract;
+      })
+      .catch(function(err) {
+        vm.error = err;
+        console.log(err);
+      });
   },
   methods: {
     pseudocodeHtml() {

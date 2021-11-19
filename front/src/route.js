@@ -7,7 +7,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: Search },
-    { path: '/contract', component: Contract },
+    { path: '/contract/:id', component: Contract },
   ]
 });
 
