@@ -9,7 +9,7 @@
     </q-header>
 
     <q-page-container>
-      <Search />
+      <router-view></router-view>
     </q-page-container>
 
     <q-footer>
@@ -22,13 +22,11 @@
 
 <script>
 import { ref } from 'vue'
-import Search from './components/Search.vue'
 
 export default {
   name: 'LayoutDefault',
 
   components: {
-    Search
   },
 
   setup () {

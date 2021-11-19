@@ -44,6 +44,7 @@ export default {
     btnGo: function() {
       var vm = this;
       console.log(vm.isManual, vm.network, vm.search, vm.manualInput);
+      location.href="/#/contract"
     },
   },
 }
