@@ -1,9 +1,9 @@
 <template>
   <q-layout view="hHh lpr lfr">
     <q-header>
-      <q-toolbar>
+      <q-toolbar class="bg-grey-3 text-dark">
         <q-toolbar-title>
-          evmexp
+          <router-link style="text-decoration: none; color: inherit;" to="/">Que contract</router-link>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -13,7 +13,7 @@
     </q-page-container>
 
     <q-footer>
-      <q-toolbar>
+      <q-toolbar class="bg-grey-3 text-dark">
         Powered by <b>panoramix decompiler</b>
       </q-toolbar>
     </q-footer>
