@@ -16,8 +16,11 @@
       </div>
 
       <!-- Code panel -->
-      <div class="col-12">
-        <q-tabs v-model="tabCode" dense inline-label align="justify">
+      <div class="col-12" v-if="!code.asm">
+        <q-skeleton height="400px" square />
+      </div>
+      <div class="col-12" v-else>
+        <q-tabs v-model="tabCode" dense inline-label no-caps align="justify">
           <q-tab name="asm" icon="source" label="Assembly"></q-tab>
           <q-tab name="pseudo" icon="code" label="Pseudocode"></q-tab>
           <q-tab name="function" icon="list" label="Functions"></q-tab>
@@ -27,14 +30,14 @@
 
         <q-tab-panels v-model="tabCode" class="q-pb-xl">
           <q-tab-panel name="asm">
-            <pre v-html="contract.asm"></pre>
+            <pre v-html="code.asm"></pre>
           </q-tab-panel>
           <q-tab-panel name="pseudo">
             <pre v-html="pseudocodeHtml()"></pre>
           </q-tab-panel>
           <q-tab-panel name="function">
             <q-list dense separator>
-              <q-item v-for="func in contract.functions" :key="func.hash">
+              <q-item v-for="func in code.functions" :key="func.hash">
                 <pre v-html="functionNameHtml(func)"></pre>
                 <pre v-if="func.payable" class="text-accent">&nbsp;payable</pre>
                 <pre v-if="!!func.getter" class="text-accent">&nbsp;view</pre>
@@ -78,7 +81,7 @@ export default {
       tabCode: "function",
       extendedAddr: "",
       extendedCodeHash: "",
-      contract: {
+      code: {
         asm: "",
         pseudocode: "",
         functions: [],
@@ -97,7 +100,7 @@ export default {
     axios.get('/api/deco/' + vm.extendedCodeHash)
       .then(function(res) {
         var resJson = res.data.default;
-        vm.contract = resJson.contract;
+        vm.code = resJson.contract;
       })
       .catch(function(err) {
         vm.error = err;
@@ -107,7 +110,7 @@ export default {
   methods: {
     pseudocodeHtml() {
       var vm = this;
-      var ansi = vm.contract.pseudocode;
+      var ansi = vm.code.pseudocode;
       var ansiConverter = new AnsiConverter({
         newline: true,
       });
