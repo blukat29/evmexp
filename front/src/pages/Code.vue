@@ -16,7 +16,9 @@
 
             <div class="text-subtitle2">
               <span v-if="extendedCodeHash">code: {{ extendedCodeHash }}</span>
-              <span v-else-if="errorCodeHash" class="text-negative">Error: {{ errorCodeHash }}</span>
+              <span v-else-if="errorCodeHash" class="text-negative">
+                Error: {{ errorCodeHash }}
+              </span>
               <span v-else><q-skeleton type="text" /></span>
             </div>
           </q-card-section>
@@ -24,10 +26,12 @@
       </div>
 
       <!-- Code panel -->
-      <div class="col-12 col-md-9" v-if="errorCodeHash">
+      <div class="col-12 col-md-9" v-if="errorCodeView">
         <div class="row justify-center items-center">
           <div class="col-12 q-pt-md">
-            <p class="text-h5 text-center text-negative"><q-icon name="error"/> Failed</p>
+            <p class="text-h6 text-center text-negative">
+              <q-icon name="error"/> Error: {{ errorCodeView }}
+            </p>
           </div>
         </div>
       </div>
@@ -85,6 +89,7 @@
 <script>
 import AnsiConverter from 'ansi-to-html';
 import axios from 'axios';
+import { getAxiosError } from '../util.js';
 import Networks from '../networks';
 
 function convertAnsi(ansi) {
@@ -114,6 +119,7 @@ export default {
         pseudocode: "",
         functions: [],
       },
+      errorCodeView: null,
     };
   },
   created() {
@@ -133,9 +139,12 @@ export default {
           return vm.extendedCodeHash;
         })
         .catch(function(err) {
-          var res = err.response;
-          vm.errorCodeHash = res.data.error;
+          vm.errorCodeHash = getAxiosError(err);
+          console.log(vm.errorCodeHash);
+          vm.errorCodeView = "No code to decompile";
           console.error(err);
+          // Explicitly stop this promise chain
+          return Promise.reject(err);
         });
     } else {
       codePromise = Promise.resolve(vm.extendedCodeHash);
@@ -148,7 +157,7 @@ export default {
         vm.codeLoaded = true;
       })
       .catch(function(err) {
-        vm.error = err;
+        vm.errorCodeView = getAxiosError(err);
         console.error(err);
       });
   },

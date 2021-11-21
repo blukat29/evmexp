@@ -79,6 +79,7 @@
 
 <script>
 import axios from 'axios';
+import { getAxiosError } from '../util.js';
 
 const networks = [
   { label: 'Ethereum mainnet', value: 'eth-mainnet' },
@@ -138,8 +139,8 @@ export default {
         .catch(function(err) {
           vm.uploading = false;
           vm.uploaded = false;
-          var res = err.response;
-          vm.errorBin = res.data.error;
+          vm.errorBin = getAxiosError(err);
+          console.error(err);
         });
         //location.href="/#/code/bin/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb"
     },
