@@ -85,6 +85,14 @@
 <script>
 import AnsiConverter from 'ansi-to-html';
 import axios from 'axios';
+import Networks from '../networks';
+
+function convertAnsi(ansi) {
+  var ansiConverter = new AnsiConverter({
+    newline: true,
+  });
+  return ansiConverter.toHtml(ansi);
+}
 
 export default {
   name: 'Code',
@@ -134,8 +142,7 @@ export default {
     codePromise
       .then((ech) => axios.get('/api/deco/' + ech))
       .then(function(res) {
-        var resJson = res.data;
-        vm.code = resJson.contract;
+        vm.code = res.data.contract;
         vm.codeLoaded = true;
       })
       .catch(function(err) {
@@ -145,45 +152,18 @@ export default {
   },
   computed: {
     explorerLink() {
-      var vm = this;
-      if (!vm.extendedAddr) return null;
-      var parts = vm.extendedAddr.split('-');
-      if (parts.length != 3) return null;
-
-      if (parts[0] == 'eth' && parts[1] == 'mainnet') {
-        return "https://etherscan.io/address/" + parts[2];
-      }
-      return null;
+      return Networks.addrExplorer(this.extendedAddr);
     },
     explorerName() {
-      var vm = this;
-      if (!vm.extendedAddr) return null;
-      var parts = vm.extendedAddr.split('-');
-      if (parts.length != 3) return null;
-
-      if (parts[0] == 'eth') {
-        return "Etherscan";
-      }
-      return null;
+      return Networks.explorerName(this.extendedAddr);
     },
     pseudocodeHtml() {
-      var vm = this;
-      var ansi = vm.code.pseudocode;
-      var ansiConverter = new AnsiConverter({
-        newline: true,
-      });
-      var html = ansiConverter.toHtml(ansi);
-      return html;
+      return convertAnsi(this.code.pseudocode)
     },
   },
   methods: {
     functionNameHtml(func) {
-      var ansi = func.color_name;
-      var ansiConverter = new AnsiConverter({
-        newline: true,
-      });
-      var html = ansiConverter.toHtml(ansi);
-      return html;
+      return convertAnsi(func.color_name)
     },
   },
 }
