@@ -1,14 +1,22 @@
 <template>
-  <q-page class="flex flex-center">
-    <div class="row fit items-start justify-center" style="max-width: 1200px">
+  <q-page class="flex">
+    <div class="row fit items-start justify-center">
 
-      <div class="col-12">
+      <div class="col-12 col-md-9">
         <q-card>
-          <q-card-section>
-            <div class="text-h6" v-if="onchain">Contract {{ extendedAddr }}</div>
+          <q-card-section style="overflow-wrap: break-word;">
+            <div class="text-h6" v-if="onchain">
+              Contract {{ extendedAddr }}
+              <a target="_blank" v-if="explorerLink" :href="explorerLink">
+                <q-icon name="open_in_new" />
+                <q-tooltip :offset="[10,10]">View it on {{ explorerName }}</q-tooltip>
+              </a>
+            </div>
             <div class="text-h6" v-else>Binary code</div>
+
             <div class="text-subtitle2">
-              <span v-if="extendedCodeHash">{{ extendedCodeHash }}</span>
+              <span v-if="extendedCodeHash">code: {{ extendedCodeHash }}</span>
+              <span v-else-if="errorCodeHash" class="text-negative">Error: {{ errorCodeHash }}</span>
               <span v-else><q-skeleton type="text" /></span>
             </div>
           </q-card-section>
@@ -16,10 +24,17 @@
       </div>
 
       <!-- Code panel -->
-      <div class="col-12" v-if="!code.asm">
+      <div class="col-12 col-md-9" v-if="errorCodeHash">
+        <div class="row justify-center items-center">
+          <div class="col-12 q-pt-md">
+            <p class="text-h5 text-center text-negative"><q-icon name="error"/> Failed</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-9" v-else-if="!codeLoaded">
         <q-skeleton height="400px" square />
       </div>
-      <div class="col-12" v-else>
+      <div class="col-12 col-md-9 q-pt-md" v-else>
         <q-tabs v-model="tabCode" dense inline-label no-caps align="justify">
           <q-tab name="asm" icon="source" label="Assembly"></q-tab>
           <q-tab name="pseudo" icon="code" label="Pseudocode"></q-tab>
@@ -33,7 +48,7 @@
             <pre v-html="code.asm"></pre>
           </q-tab-panel>
           <q-tab-panel name="pseudo">
-            <pre v-html="pseudocodeHtml()"></pre>
+            <pre v-html="pseudocodeHtml"></pre>
           </q-tab-panel>
           <q-tab-panel name="function">
             <q-list dense separator>
@@ -49,7 +64,7 @@
       </div>
     </div>
 
-    <q-page-sticky position="bottom" :offset="[0,18]">
+    <q-page-sticky position="bottom" :offset="[0,18]" v-if="codeLoaded">
       <q-list bordered class="bg-grey-5">
         <!-- Query storage -->
         <q-expansion-item group="inspect" padding icon="explore" label="Inspect on-chain data">
@@ -81,6 +96,8 @@ export default {
       tabCode: "function",
       extendedAddr: "",
       extendedCodeHash: "",
+      errorCodeHash: "",
+      codeLoaded: false,
       code: {
         asm: "",
         pseudocode: "",
@@ -101,11 +118,14 @@ export default {
     if (vm.onchain) {
       codePromise = axios.get('/api/addr/' + vm.extendedAddr)
         .then(function(res) {
-          console.log(res);
-          var resJson = res.data;
-          console.log(resJson);
-          vm.extendedCodeHash = resJson.extendedCodeHash;
+          vm.extendedCodeHash = res.data.extendedCodeHash;
           return vm.extendedCodeHash;
+        })
+        .catch(function(err) {
+          var res = err.response;
+          if (res.status == 404) {
+            vm.errorCodeHash = res.data.error;
+          }
         });
     } else {
       codePromise = Promise.resolve(vm.extendedCodeHash);
@@ -116,13 +136,36 @@ export default {
       .then(function(res) {
         var resJson = res.data;
         vm.code = resJson.contract;
+        vm.codeLoaded = true;
       })
       .catch(function(err) {
         vm.error = err;
         console.log(err);
       });
   },
-  methods: {
+  computed: {
+    explorerLink() {
+      var vm = this;
+      if (!vm.extendedAddr) return null;
+      var parts = vm.extendedAddr.split('-');
+      if (parts.length != 3) return null;
+
+      if (parts[0] == 'eth' && parts[1] == 'mainnet') {
+        return "https://etherscan.io/address/" + parts[2];
+      }
+      return null;
+    },
+    explorerName() {
+      var vm = this;
+      if (!vm.extendedAddr) return null;
+      var parts = vm.extendedAddr.split('-');
+      if (parts.length != 3) return null;
+
+      if (parts[0] == 'eth') {
+        return "Etherscan";
+      }
+      return null;
+    },
     pseudocodeHtml() {
       var vm = this;
       var ansi = vm.code.pseudocode;
@@ -132,6 +175,8 @@ export default {
       var html = ansiConverter.toHtml(ansi);
       return html;
     },
+  },
+  methods: {
     functionNameHtml(func) {
       var ansi = func.color_name;
       var ansiConverter = new AnsiConverter({

@@ -41,6 +41,11 @@ function installMock() {
       extendedCodeHash: "evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb",
     }));
 
+  mock.onGet(/\/api\/addr\/\w+/)
+    .reply(() => delayed(1000, 404, {
+      error: "No such contract",
+    }));
+
   mock.onGet("/api/deco/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb")
     .reply(() => delayed(2000, 200, sampleContract.default));
 
