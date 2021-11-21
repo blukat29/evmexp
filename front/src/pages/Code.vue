@@ -3,7 +3,16 @@
     <div class="row fit items-start justify-center" style="max-width: 1200px">
 
       <div class="col-12">
-        Contract {{ contractId }}
+        <q-card>
+          <q-card-section>
+            <div class="text-h6" v-if="onchain">Contract {{ extendedAddr }}</div>
+            <div class="text-h6" v-else>Binary code</div>
+            <div class="text-subtitle2">
+              <span v-if="extendedCodeHash">{{ extendedCodeHash }}</span>
+              <span v-else><q-skeleton type="text" /></span>
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Code panel -->
@@ -56,16 +65,19 @@
 </style>
 
 <script>
-//import * as sampleContract from '../test/eth_usdt.json';
 import AnsiConverter from 'ansi-to-html';
 import axios from 'axios';
 
 export default {
-  name: 'Contract',
+  name: 'Code',
+  props: {
+    onchain: Boolean,
+  },
   data() {
     return {
       tabCode: "function",
-      contractId: "",
+      extendedAddr: "",
+      extendedCodeHash: "",
       contract: {
         asm: "",
         pseudocode: "",
@@ -75,9 +87,14 @@ export default {
   },
   created() {
     var vm = this;
-    vm.contractId = this.$route.params.id;
+    if (vm.onchain) {
+      vm.extendedAddr = this.$route.params.id;
+    }
+    else {
+      vm.extendedCodeHash = this.$route.params.id;
+    }
 
-    axios.get('/api/deco/' + vm.contractId)
+    axios.get('/api/deco/' + vm.extendedCodeHash)
       .then(function(res) {
         var resJson = res.data.default;
         vm.contract = resJson.contract;

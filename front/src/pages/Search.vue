@@ -44,7 +44,7 @@ export default {
     btnGo: function() {
       var vm = this;
       console.log(vm.isManual, vm.network, vm.search, vm.manualInput);
-      location.href="/#/contract/code0000"
+      location.href="/#/code/bin/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb"
     },
   },
 }

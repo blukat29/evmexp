@@ -15,7 +15,7 @@ function installMock() {
   console.log('Installing API mock');
   var mock = new MockAdapter(axios)
 
-  mock.onGet("/api/deco/code0000").reply(200, sampleContract);
+  mock.onGet("/api/deco/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb").reply(200, sampleContract);
   //mock.onPost("/api/contract/upload").reply(function(req) { });
 }
 

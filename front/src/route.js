@@ -1,13 +1,16 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Search from './pages/Search.vue'
-import Contract from './pages/Contract.vue'
+import Code from './pages/Code.vue'
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: Search },
-    { path: '/contract/:id', component: Contract },
+    { path: '/code/bin/:id', component: Code,
+      props: { onchain: false } },
+    { path: '/code/addr/:id', component: Code,
+      props: { onchain: true } },
   ]
 });
 
