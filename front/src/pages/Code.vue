@@ -97,9 +97,24 @@ export default {
       vm.extendedCodeHash = this.$route.params.id;
     }
 
-    axios.get('/api/deco/' + vm.extendedCodeHash)
+    var codePromise;
+    if (vm.onchain) {
+      codePromise = axios.get('/api/addr/' + vm.extendedAddr)
+        .then(function(res) {
+          console.log(res);
+          var resJson = res.data;
+          console.log(resJson);
+          vm.extendedCodeHash = resJson.extendedCodeHash;
+          return vm.extendedCodeHash;
+        });
+    } else {
+      codePromise = Promise.resolve(vm.extendedCodeHash);
+    }
+
+    codePromise
+      .then((ech) => axios.get('/api/deco/' + ech))
       .then(function(res) {
-        var resJson = res.data.default;
+        var resJson = res.data;
         vm.code = resJson.contract;
       })
       .catch(function(err) {
