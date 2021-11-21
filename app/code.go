@@ -8,9 +8,8 @@ import (
 )
 
 type BinaryCode struct {
-	ExtendedCodeHash string
-	Format           string
-	Binary           []byte // not hex; binary data.
+	Format string
+	Binary []byte // not hex; binary data.
 }
 
 var codeDB = map[string]*BinaryCode{}
@@ -41,13 +40,11 @@ func CodeUpload(req *CodeUploadRequest) (*CodeUploadResponse, error) {
 
 	codeHash := fmt.Sprintf("%x", sha256.Sum256(binary))
 	extendedCodeHash := format + "-" + codeHash
-	fmt.Println(extendedCodeHash)
 
 	if _, ok := codeDB[extendedCodeHash]; !ok {
 		codeDB[extendedCodeHash] = &BinaryCode{
-			ExtendedCodeHash: extendedCodeHash,
-			Format:           format,
-			Binary:           binary,
+			Format: format,
+			Binary: binary,
 		}
 	}
 	return &CodeUploadResponse{

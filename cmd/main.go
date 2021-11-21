@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/blukat29/evm-explorer/app"
+	"github.com/blukat29/evm-explorer/deco"
 	"github.com/spf13/pflag"
 )
 
@@ -22,15 +23,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		res, err := app.Decompile(&app.ContractRequest{
-			Addr:  "",
-			Chain: "",
-			Code:  string(code),
-		})
+		j, err := deco.RunWorker(string(code))
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(res.Contract)
+		fmt.Println(j)
 		return
 	}
 

@@ -10,6 +10,14 @@ func (e *InputError) Error() string {
 	return e.Message
 }
 
+type NotFoundError struct {
+	Message string
+}
+
+func (e *NotFoundError) Error() string {
+	return e.Message
+}
+
 // JSON data types
 
 type Response struct {
@@ -24,14 +32,13 @@ type Contract struct {
 	Storages   []interface{} `json:"storage"`
 }
 
-type ContractRequest struct {
-	Addr  string `json:"addr"`
-	Chain string `json:"chain"`
-	Code  string `json:"code"`
+type DecoRequest struct {
+	ExtendedCodeHash string `uri:"id" binding:"required"`
 }
 
-type ContractResponse struct {
-	Contract Contract `json:"contract"`
+type DecoResponse struct {
+	Response
+	Contract interface{} `json:"contract"`
 }
 
 type CodeUploadRequest struct {
