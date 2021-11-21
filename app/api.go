@@ -1,5 +1,21 @@
 package app
 
+// In-memory types
+
+type InputError struct {
+	Message string
+}
+
+func (e *InputError) Error() string {
+	return e.Message
+}
+
+// JSON data types
+
+type Response struct {
+	Error string `json:"error"`
+}
+
 // TODO: further concretize Functions and Storages.
 type Contract struct {
 	Asm        string        `json:"asm"`
@@ -16,4 +32,14 @@ type ContractRequest struct {
 
 type ContractResponse struct {
 	Contract Contract `json:"contract"`
+}
+
+type CodeUploadRequest struct {
+	Format string `json:"format"`
+	Binary string `json:"binary" binding:"required"`
+}
+
+type CodeUploadResponse struct {
+	Response
+	ExtendedCodeHash string `json:"extendedCodeHash"`
 }
