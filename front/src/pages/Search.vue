@@ -1,7 +1,11 @@
 <template>
-  <q-page class="flex flex-center">
-    <div class="row">
-      <div class="col-12">
+  <q-page class="flex">
+    <div class="row fit items-start justify-center">
+      <div class="col-12 col-md-9 q-pt-xl q-pb-xl">
+        <div class="text-h4">Online EVM decompiler &amp; contract explorer</div>
+        <div class="text-subtitle2">for Ethereum and Klaytn</div>
+      </div>
+      <div class="col-12 col-md-9">
         <q-card>
           <q-tabs no-caps v-model="mode" align="justify"
                   class="text-grey" active-color="primary" indicator-color="primary">
@@ -33,7 +37,7 @@
             </q-tab-panel>
 
             <q-tab-panel name="bin">
-              <div class="row items-center q-gutter-md justify-evenly">
+              <div class="row items-center q-gutter-md justify-center">
                 <div class="col-3" hidden>
                   <q-select v-model="format" :options="formatNames" label="Format" />
                 </div>
@@ -44,6 +48,18 @@
                 <div class="col-auto">
                   <q-btn color="primary" label="Decompile contract" @click="btnBin"/>
                 </div>
+                <div class="col-auto">
+                  <div v-if="uploading" class="text-primary">
+                    <q-spinner color="primary" /> uploading..
+                  </div>
+                  <div v-else-if="uploaded" class="text-positive">
+                    <q-icon name="check_circle" /> uploaded!
+                  </div>
+                  <div v-else-if="errorBin" class="text-negative">
+                    <q-icon name="error" /> {{ errorBin }}
+                  </div>
+                </div>
+
               </div>
             </q-tab-panel>
 
@@ -62,6 +78,7 @@
 </style>
 
 <script>
+import axios from 'axios';
 
 const networks = [
   { label: 'Ethereum mainnet', value: 'eth-mainnet' },
@@ -81,11 +98,14 @@ export default {
 
       networkNames: networks,
       network: networks[0],
-      addr: '',
+      addr: "",
 
       formatNames: formats,
       format: formats[0],
-      bin: '',
+      bin: "",
+      uploading: false,
+      uploaded: false,
+      errorBin: null,
     };
   },
   created() {
@@ -94,14 +114,34 @@ export default {
     btnAddr: function() {
       var vm = this;
       var path = "/code/addr/" + vm.network.value + "-" + vm.addr;
-      vm.$router.push({
-        path: path
-      });
+      vm.$router.push({ path: path });
     },
     btnBin: function() {
       var vm = this;
-      console.log(vm.format.value, vm.bin);
-      location.href="/#/code/bin/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb"
+      vm.uploading = true;
+      vm.uploaded = false;
+
+      var data = {
+        format: vm.format.value,
+        binary: vm.bin,
+      };
+      var options = { headers: { "Content-Type": `application/json`} };
+      axios.post("/api/code/upload", data, options)
+        .then(function(res) {
+          var extendedCodeHash = res.data.extendedCodeHash;
+          var path = "/code/bin/" + extendedCodeHash;
+
+          vm.uploading = false;
+          vm.uploaded = true;
+          setTimeout(() => vm.$router.push({ path: path }), 500);
+        })
+        .catch(function(err) {
+          vm.uploading = false;
+          vm.uploaded = false;
+          var res = err.response;
+          vm.errorBin = res.data.error;
+        });
+        //location.href="/#/code/bin/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb"
     },
   },
 }

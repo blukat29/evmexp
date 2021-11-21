@@ -102,9 +102,12 @@ export default {
   data() {
     return {
       tabCode: "function",
+
       extendedAddr: "",
+
       extendedCodeHash: "",
-      errorCodeHash: "",
+      errorCodeHash: null,
+
       codeLoaded: false,
       code: {
         asm: "",
@@ -131,9 +134,8 @@ export default {
         })
         .catch(function(err) {
           var res = err.response;
-          if (res.status == 404) {
-            vm.errorCodeHash = res.data.error;
-          }
+          vm.errorCodeHash = res.data.error;
+          console.error(err);
         });
     } else {
       codePromise = Promise.resolve(vm.extendedCodeHash);
@@ -147,7 +149,7 @@ export default {
       })
       .catch(function(err) {
         vm.error = err;
-        console.log(err);
+        console.error(err);
       });
   },
   computed: {

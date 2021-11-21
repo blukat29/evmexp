@@ -3,7 +3,7 @@
     <q-header>
       <q-toolbar class="bg-grey-3 text-dark">
         <q-toolbar-title>
-          <router-link style="text-decoration: none; color: inherit;" to="/">Que contract</router-link>
+          <router-link style="text-decoration: none; color: inherit;" to="/">EVM explorer</router-link>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
