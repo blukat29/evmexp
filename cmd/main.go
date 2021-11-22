@@ -58,5 +58,9 @@ func main() {
 		return
 	}
 
+	if err := network.Init(); err != nil {
+		log.Fatal(err)
+	}
+
 	app.Serve()
 }

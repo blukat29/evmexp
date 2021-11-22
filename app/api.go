@@ -24,6 +24,25 @@ type Response struct {
 	Error string `json:"error"`
 }
 
+type AddrRequest struct {
+	ExtendedAddr string `uri:"addr" binding:"required"`
+}
+
+type AddrResponse struct {
+	Response
+	ExtendedCodeHash string `json:"extendedCodeHash"`
+}
+
+type CodeUploadRequest struct {
+	Format string `json:"format"`
+	Binary string `json:"binary" binding:"required"`
+}
+
+type CodeUploadResponse struct {
+	Response
+	ExtendedCodeHash string `json:"extendedCodeHash"`
+}
+
 // TODO: further concretize Functions and Storages.
 type Contract struct {
 	Asm        string        `json:"asm"`
@@ -39,14 +58,4 @@ type DecoRequest struct {
 type DecoResponse struct {
 	Response
 	Contract interface{} `json:"contract"`
-}
-
-type CodeUploadRequest struct {
-	Format string `json:"format"`
-	Binary string `json:"binary" binding:"required"`
-}
-
-type CodeUploadResponse struct {
-	Response
-	ExtendedCodeHash string `json:"extendedCodeHash"`
 }

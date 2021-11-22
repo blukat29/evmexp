@@ -16,6 +16,7 @@ func Serve() {
 
 	api := r.Group("/api")
 	{
+		api.GET("/addr/:addr", ApiAddr)
 		api.POST("/code/upload", ApiCodeUpload)
 		api.GET("/deco/:id", ApiDeco)
 	}
@@ -31,6 +32,21 @@ func MatchErrorCode(err error) int {
 		return http.StatusNotFound
 	default:
 		return http.StatusInternalServerError
+	}
+}
+
+func ApiAddr(c *gin.Context) {
+	req := &AddrRequest{}
+	if err := c.BindUri(req); err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if res, err := FetchAddr(req); err != nil {
+		log.Print(err)
+		c.JSON(MatchErrorCode(err), &Response{Error: err.Error()})
+	} else {
+		c.JSON(http.StatusOK, res)
 	}
 }
 
