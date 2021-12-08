@@ -80,12 +80,11 @@
 <script>
 import axios from 'axios';
 import { getAxiosError } from '../util.js';
+import Networks from '../networks';
 
-const networks = [
-  { label: 'Ethereum mainnet', value: 'eth-mainnet' },
-  { label: 'Klaytn Cypress mainnet', value: 'klaytn-mainnet' },
-  { label: 'Ethereum Ropsten testnet', value: 'eth-ropsten' },
-];
+const networks = Networks.all().map((net) => {
+  return { label: net.displayName, value: net.name };
+});
 
 const formats = [
   { label: 'EVM', value: 'evm-generic' },

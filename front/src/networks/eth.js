@@ -1,41 +1,33 @@
 
-const etherscanBaseUrl = {
-  "mainnet": "https://etherscan.io",
-  "ropsten": "https://ropsten.etherscan.io",
-  "kovan":   "https://kovan.etherscan.io",
-  "rinkeby": "https://rinkeby.etherscan.io",
-};
-
-const EthNetwork = {
-  isAddr: function(addr) {
+class EthNetwork {
+  constructor(name, displayName, baseUrl) {
+    this.name = name || "eth";
+    this.displayName = displayName || "Ethereum mainnet";
+    this.baseUrl = baseUrl || "https://etherscan.io";
+  }
+  isAddr(addr) {
     return !!addr.match(/^0x[a-fA-F0-9]{40}$/);
-  },
-  isTxid: function(txid) {
+  }
+  isTxid(txid) {
     return !!txid.match(/^0x[a-fA-F0-9]{64}$/);
-  },
-  explorerName: function() {
+  }
+  explorerName() {
     return "etherscan.io";
-  },
-  addrExplorer: function(addr, subnet) {
-    subnet = subnet || "mainnet";
+  }
+  addrExplorer(addr) {
     if (this.isAddr(addr)) {
-      var base = etherscanBaseUrl[subnet];
-      if (base) {
-        return base + "/address/" + addr;
-      }
+      return this.baseUrl + "/address/" + addr;
+    } else {
+      return null;
     }
-    return null;
-  },
-  txExplorer: function(txid, subnet) {
-    subnet = subnet || "mainnet";
+  }
+  txExplorer(txid) {
     if (this.isAddr(txid)) {
-      var base = etherscanBaseUrl[subnet];
-      if (base) {
-        return base + "/tx/" + txid;
-      }
+      return this.baseUrl + "/tx/" + txid;
+    } else {
+      return null;
     }
-    return null;
-  },
-};
+  }
+}
 
 export default EthNetwork;

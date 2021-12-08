@@ -1,41 +1,36 @@
 import EthNetwork from './eth.js';
+import {extid} from '../util.js';
 
-const networkMap = {
-  'eth': EthNetwork,
-};
+const allNetworks = [
+  new EthNetwork(),
+  new EthNetwork('eth_ropsten', "Ethereum Ropsten testnet", "https://ropsten.etherscan.io"),
+];
+
+const networkMap = new Map();
+allNetworks.forEach(n => {
+  networkMap[n.name] = n;
+});
 
 const Networks = {
-  parseExtendedId: function(extendedSomething) {
-    var parts = extendedSomething.split('-');
-    if (parts.length < 2)
-      return null;
-    if (!(parts[0] in networkMap))
-      return null;
-
-    var eid = {
-      network: networkMap[parts[0]],
-      name: parts[0],
-    };
-    if (parts.length == 2) {
-      eid.subnet = null;
-      eid.id = parts[1];
-    } else if (parts.length == 3) {
-      eid.subnet = parts[1];
-      eid.id = parts[2];
-    }
-    return eid;
+  all: function() {
+    return allNetworks;
   },
-  explorerName: function(extendedId) {
-    var eid = this.parseExtendedId(extendedId);
+  get: function(name) {
+    return networkMap[name];
+  },
+  explorerName: function(extId) {
+    var eid = extid.decodeId(extId)
     if (!eid)
       return null;
-    return eid.network.explorerName();
+    var net = Networks.get(eid.network)
+    return net.explorerName();
   },
-  addrExplorer: function(extendedAddr) {
-    var eid = this.parseExtendedId(extendedAddr);
+  addrExplorer: function(extAddr) {
+    var eid = extid.decodeAddr(extAddr)
     if (!eid)
       return null;
-    return eid.network.addrExplorer(eid.id, eid.subnet);
+    var net = Networks.get(eid.network)
+    return net.addrExplorer(eid.addr);
   },
 };
 

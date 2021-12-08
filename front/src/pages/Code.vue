@@ -6,7 +6,7 @@
         <q-card>
           <q-card-section style="overflow-wrap: break-word;">
             <div class="text-h6" v-if="onchain">
-              Contract {{ extendedAddr }}
+              Contract {{ extAddr }}
               <a target="_blank" v-if="explorerLink" :href="explorerLink">
                 <q-icon name="open_in_new" />
                 <q-tooltip :offset="[10,10]">View it on {{ explorerName }}</q-tooltip>
@@ -15,9 +15,9 @@
             <div class="text-h6" v-else>Binary code</div>
 
             <div class="text-subtitle2">
-              <span v-if="extendedCodeHash">code: {{ extendedCodeHash }}</span>
-              <span v-else-if="errorCodeHash" class="text-negative">
-                Error: {{ errorCodeHash }}
+              <span v-if="extCodeID">code: {{ extCodeID }}</span>
+              <span v-else-if="errorCodeID" class="text-negative">
+                Error: {{ errorCodeID }}
               </span>
               <span v-else><q-skeleton type="text" /></span>
             </div>
@@ -108,10 +108,10 @@ export default {
     return {
       tabCode: "function",
 
-      extendedAddr: "",
+      extAddr: "",
 
-      extendedCodeHash: "",
-      errorCodeHash: null,
+      extCodeID: "",
+      errorCodeID: null,
 
       codeLoaded: false,
       code: {
@@ -125,33 +125,33 @@ export default {
   created() {
     var vm = this;
     if (vm.onchain) {
-      vm.extendedAddr = this.$route.params.id;
+      vm.extAddr = this.$route.params.id;
     }
     else {
-      vm.extendedCodeHash = this.$route.params.id;
+      vm.extCodeID = this.$route.params.id;
     }
 
     var codePromise;
     if (vm.onchain) {
-      codePromise = axios.get('/api/addr/' + vm.extendedAddr)
+      codePromise = axios.get('/api/addr/' + vm.extAddr)
         .then(function(res) {
-          vm.extendedCodeHash = res.data.extendedCodeHash;
-          return vm.extendedCodeHash;
+          vm.extCodeID = res.data.extCodeID;
+          return vm.extCodeID;
         })
         .catch(function(err) {
-          vm.errorCodeHash = getAxiosError(err);
-          console.log(vm.errorCodeHash);
+          vm.errorCodeID = getAxiosError(err);
+          console.log(vm.errorCodeID);
           vm.errorCodeView = "No code to decompile";
           console.error(err);
           // Explicitly stop this promise chain
           return Promise.reject(err);
         });
     } else {
-      codePromise = Promise.resolve(vm.extendedCodeHash);
+      codePromise = Promise.resolve(vm.extCodeID);
     }
 
     codePromise
-      .then((ech) => axios.get('/api/deco/' + ech))
+      .then((ecid) => axios.get('/api/deco/' + ecid))
       .then(function(res) {
         vm.code = res.data.contract;
         vm.codeLoaded = true;
@@ -163,10 +163,10 @@ export default {
   },
   computed: {
     explorerLink() {
-      return Networks.addrExplorer(this.extendedAddr);
+      return Networks.addrExplorer(this.extAddr);
     },
     explorerName() {
-      return Networks.explorerName(this.extendedAddr);
+      return Networks.explorerName(this.extAddr);
     },
     pseudocodeHtml() {
       return convertAnsi(this.code.pseudocode)
