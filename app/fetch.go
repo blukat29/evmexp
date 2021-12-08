@@ -1,47 +1,49 @@
 package app
 
 import (
-	"strings"
+	"log"
 
 	"github.com/blukat29/evm-explorer/network"
+	"github.com/blukat29/evm-explorer/util"
 )
 
 type AddrInfo struct {
-	ExtendedCodeHash string
+	ExtCodeID string
 }
 
 var addrDB = map[string]*AddrInfo{}
 
 func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
-	extendedAddr := req.ExtendedAddr
+	extAddr := req.ExtAddr
 
-	if info, ok := addrDB[extendedAddr]; ok {
+	if info, ok := addrDB[extAddr]; ok {
 		return &AddrResponse{
-			ExtendedCodeHash: info.ExtendedCodeHash,
+			ExtCodeID: info.ExtCodeID,
 		}, nil
 	}
 
-	parts := strings.Split(extendedAddr, "-")
-	if len(parts) != 3 {
-		return nil, &InputError{Message: "malformed extended address"}
+	net, addr, ok := util.DecodeExtId(extAddr)
+	if !ok {
+		return nil, &InputError{Message: "malformed ext address"}
 	}
-	fetcher := network.GetFetcher(parts[0] + "-" + parts[1])
+	fetcher := network.GetFetcher(net)
 	if fetcher == nil {
 		return nil, &InputError{Message: "not supported network"}
 	}
-	code, err := fetcher.GetCode(parts[2])
+	code, err := fetcher.GetCode(addr)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, &NetworkError{Message: "cannot fetch contract code"}
 	}
-	extendedCodeHash, err := SaveCode("evm-generic", string(code))
+	extCodeID, err := SaveCode("evm_generic", string(code))
 	if err != nil {
 		return nil, err
 	}
 
-	addrDB[extendedAddr] = &AddrInfo{
-		ExtendedCodeHash: extendedCodeHash,
+	addrDB[extAddr] = &AddrInfo{
+		ExtCodeID: extCodeID,
 	}
 	return &AddrResponse{
-		ExtendedCodeHash: extendedCodeHash,
+		ExtCodeID: extCodeID,
 	}, nil
 }

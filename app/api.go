@@ -18,6 +18,14 @@ func (e *NotFoundError) Error() string {
 	return e.Message
 }
 
+type NetworkError struct {
+	Message string
+}
+
+func (e *NetworkError) Error() string {
+	return e.Message
+}
+
 // JSON data types
 
 type Response struct {
@@ -25,12 +33,12 @@ type Response struct {
 }
 
 type AddrRequest struct {
-	ExtendedAddr string `uri:"addr" binding:"required"`
+	ExtAddr string `uri:"addr" binding:"required"`
 }
 
 type AddrResponse struct {
 	Response
-	ExtendedCodeHash string `json:"extendedCodeHash"`
+	ExtCodeID string `json:"extCodeID"`
 }
 
 type CodeUploadRequest struct {
@@ -40,7 +48,7 @@ type CodeUploadRequest struct {
 
 type CodeUploadResponse struct {
 	Response
-	ExtendedCodeHash string `json:"extendedCodeHash"`
+	ExtCodeID string `json:"extCodeID"`
 }
 
 // TODO: further concretize Functions and Storages.
@@ -52,7 +60,7 @@ type Contract struct {
 }
 
 type DecoRequest struct {
-	ExtendedCodeHash string `uri:"id" binding:"required"`
+	ExtCodeID string `uri:"id" binding:"required"`
 }
 
 type DecoResponse struct {

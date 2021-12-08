@@ -14,17 +14,17 @@ type Decompilation struct {
 var decoDB = map[string]*Decompilation{}
 
 func Deco(req *DecoRequest) (*DecoResponse, error) {
-	extendedCodeHash := req.ExtendedCodeHash
+	extCodeID := req.ExtCodeID
 
 	var contract Contract
-	if deco, ok := decoDB[extendedCodeHash]; ok {
+	if deco, ok := decoDB[extCodeID]; ok {
 		if err := json.Unmarshal([]byte(deco.CodeJson), &contract); err != nil {
 			return nil, err
 		}
 		return &DecoResponse{Contract: contract}, nil
 	}
 
-	binCode, ok := codeDB[extendedCodeHash]
+	binCode, ok := codeDB[extCodeID]
 	if !ok {
 		return nil, &NotFoundError{Message: "no such code"}
 	}
@@ -38,7 +38,7 @@ func Deco(req *DecoRequest) (*DecoResponse, error) {
 		return nil, err
 	}
 
-	decoDB[extendedCodeHash] = &Decompilation{
+	decoDB[extCodeID] = &Decompilation{
 		CodeJson: string(contractJson),
 	}
 	return &DecoResponse{Contract: contract}, nil

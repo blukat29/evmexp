@@ -24,17 +24,17 @@ func SaveCode(format, codeHex string) (string, error) {
 		return "", &InputError{Message: "malformed binary"}
 	}
 
-	codeHash := fmt.Sprintf("%x", sha256.Sum256(binary))
-	extendedCodeHash := format + "-" + codeHash
+	codeID := fmt.Sprintf("%x", sha256.Sum256(binary))
+	extCodeID := format + "-" + codeID
 
-	if _, ok := codeDB[extendedCodeHash]; !ok {
-		codeDB[extendedCodeHash] = &BinaryCode{
+	if _, ok := codeDB[extCodeID]; !ok {
+		codeDB[extCodeID] = &BinaryCode{
 			Format: format,
 			Binary: binary,
 		}
 	}
 
-	return extendedCodeHash, nil
+	return extCodeID, nil
 }
 
 func CodeUpload(req *CodeUploadRequest) (*CodeUploadResponse, error) {
@@ -51,12 +51,12 @@ func CodeUpload(req *CodeUploadRequest) (*CodeUploadResponse, error) {
 	if len(req.Binary) == 0 {
 		return nil, &InputError{Message: "empty binary"}
 	}
-	extendedCodeHash, err := SaveCode(req.Format, req.Binary)
+	extCodeID, err := SaveCode(req.Format, req.Binary)
 	if err != nil {
 		return nil, err
 	}
 
 	return &CodeUploadResponse{
-		ExtendedCodeHash: extendedCodeHash,
+		ExtCodeID: extCodeID,
 	}, nil
 }

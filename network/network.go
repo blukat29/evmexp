@@ -8,7 +8,8 @@ var fetchers = map[string]Fetcher{}
 
 func Init() error {
 	// https://ethereumnodes.com/
-	fetchers["eth-mainnet"] = NewEthFetcher("https://cloudflare-eth.com/")
+	fetchers["eth"] = NewEthFetcher("https://cloudflare-eth.com/")
+	fetchers["eth_ropsten"] = NewEthFetcher("https://ropsten-rpc.linkpool.io/")
 	return nil
 }
 
