@@ -61,6 +61,11 @@
                 <pre v-if="func.payable" class="text-accent">&nbsp;payable</pre>
                 <pre v-if="!!func.getter" class="text-accent">&nbsp;view</pre>
                 <pre v-html="' @ ' + func.hash" class="text-info"></pre>
+                &nbsp;
+                <a target="_blank" :href="bloxyFunctionLink(func.hash)">
+                  <pre><q-icon name="open_in_new" /></pre>
+                  <q-tooltip :offset="[0,0]">View it on Bloxy</q-tooltip>
+                </a>
               </q-item>
             </q-list>
           </q-tab-panel>
@@ -84,6 +89,9 @@
 </template>
 
 <style>
+pre {
+  margin: 0.3em;
+}
 </style>
 
 <script>
@@ -175,6 +183,12 @@ export default {
   methods: {
     functionNameHtml(func) {
       return convertAnsi(func.color_name)
+    },
+    bloxyFunctionLink(funcHash) {
+      if (funcHash.startsWith("0x")) {
+        funcHash = funcHash.substring(2);
+      }
+      return "https://bloxy.info/functions/" + funcHash;
     },
   },
 }
