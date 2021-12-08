@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "{\"format\":\"evm-generic\", \"binary\":\"$(cat vectors/eth_usdt.txt)\"}" \
+echo "{\"format\":\"evm_generic\", \"binary\":\"$(cat vectors/eth_usdt.txt)\"}" \
     | curl -v -H "Content-Type: application/json" -X POST --data @- \
       http://localhost:8000/api/code/upload
 

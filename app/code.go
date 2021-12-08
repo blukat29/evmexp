@@ -25,7 +25,7 @@ func SaveCode(format, codeHex string) (string, error) {
 	}
 
 	codeID := fmt.Sprintf("%x", sha256.Sum256(binary))
-	extCodeID := format + "-" + codeID
+	extCodeID := util.EncodeId(format, codeID)
 
 	if _, ok := codeDB[extCodeID]; !ok {
 		codeDB[extCodeID] = &BinaryCode{
@@ -40,10 +40,10 @@ func SaveCode(format, codeHex string) (string, error) {
 func CodeUpload(req *CodeUploadRequest) (*CodeUploadResponse, error) {
 	// Parse input
 	if len(req.Format) == 0 {
-		req.Format = "evm-generic"
+		req.Format = "evm_generic"
 	}
 	switch req.Format {
-	case "evm-generic":
+	case "evm_generic":
 	default:
 		return nil, &InputError{Message: "invalid format"}
 	}

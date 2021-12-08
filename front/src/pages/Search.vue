@@ -87,7 +87,7 @@ const networks = Networks.all().map((net) => {
 });
 
 const formats = [
-  { label: 'EVM', value: 'evm-generic' },
+  { label: 'EVM', value: 'evm_generic' },
 ];
 
 export default {
@@ -141,7 +141,7 @@ export default {
           vm.errorBin = getAxiosError(err);
           console.error(err);
         });
-        //location.href="/#/code/bin/evm-generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb"
+        //location.href="/#/code/bin/evm_generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb"
     },
   },
 }
