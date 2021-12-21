@@ -17,10 +17,10 @@ var addrDB = map[string]*AddrInfo{}
 func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 	extAddr := req.ExtAddr
 
-	var info AddrInfo
 	if value, ok, err := storage.Get("addrs", extAddr); err != nil {
 		return nil, err
 	} else if ok {
+		info := value.(*AddrInfo)
 		return &AddrResponse{
 			ExtCodeID: info.ExtCodeID,
 		}, nil
