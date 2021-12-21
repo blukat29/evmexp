@@ -1,9 +1,11 @@
 import EthNetwork from './eth.js';
+import KlayNetwork from './klay.js';
 import {extid} from '../util.js';
 
 const allNetworks = [
   new EthNetwork(),
   new EthNetwork('eth_ropsten', "Ethereum Ropsten testnet", "https://ropsten.etherscan.io"),
+  new KlayNetwork(),
 ];
 
 const networkMap = new Map();
