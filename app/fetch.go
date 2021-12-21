@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/blukat29/evm-explorer/network"
+	"github.com/blukat29/evm-explorer/storage"
 	"github.com/blukat29/evm-explorer/util"
 )
 
@@ -16,7 +17,10 @@ var addrDB = map[string]*AddrInfo{}
 func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 	extAddr := req.ExtAddr
 
-	if info, ok := addrDB[extAddr]; ok {
+	var info AddrInfo
+	if value, ok, err := storage.Get("addrs", extAddr); err != nil {
+		return nil, err
+	} else if ok {
 		return &AddrResponse{
 			ExtCodeID: info.ExtCodeID,
 		}, nil
@@ -40,10 +44,10 @@ func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 		return nil, err
 	}
 
-	addrDB[extAddr] = &AddrInfo{
+	err = storage.Set("addrs", extAddr, &AddrInfo{
 		ExtCodeID: extCodeID,
-	}
+	})
 	return &AddrResponse{
 		ExtCodeID: extCodeID,
-	}, nil
+	}, err
 }

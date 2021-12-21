@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+
+	"github.com/blukat29/evm-explorer/util"
 )
 
 type BinaryCode struct {
@@ -25,7 +27,7 @@ func SaveCode(format, codeHex string) (string, error) {
 	}
 
 	codeID := fmt.Sprintf("%x", sha256.Sum256(binary))
-	extCodeID := util.EncodeId(format, codeID)
+	extCodeID := util.EncodeExtId(format, codeID)
 
 	if _, ok := codeDB[extCodeID]; !ok {
 		codeDB[extCodeID] = &BinaryCode{

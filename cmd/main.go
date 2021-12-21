@@ -9,6 +9,7 @@ import (
 	"github.com/blukat29/evm-explorer/app"
 	"github.com/blukat29/evm-explorer/deco"
 	"github.com/blukat29/evm-explorer/network"
+	"github.com/blukat29/evm-explorer/storage"
 	"github.com/spf13/pflag"
 )
 
@@ -59,6 +60,9 @@ func main() {
 	}
 
 	if err := network.Init(); err != nil {
+		log.Fatal(err)
+	}
+	if err := storage.Init(); err != nil {
 		log.Fatal(err)
 	}
 
