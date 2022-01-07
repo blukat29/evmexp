@@ -3,6 +3,7 @@ package storage
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/dgraph-io/ristretto"
 	"github.com/eko/gocache/cache"
@@ -18,7 +19,11 @@ func Init() error {
 		return err
 	}
 
-	sStore, err := newSqliteStore("data.db")
+	sqlitePath := os.Getenv("DB_PATH")
+	if len(sqlitePath) == 0 {
+		sqlitePath = "data.db"
+	}
+	sStore, err := newSqliteStore(sqlitePath)
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,10 @@
+Dockerfile
+.dockerignore
+build.sh
+run.sh
+
+front/node_modules
+front/dist
+
+evexp
+*.db
