@@ -20,13 +20,14 @@ func Init() error {
 	klayAccessKeyId := os.Getenv("KAS_KEY_ID")
 	klayAccessKeySecret := os.Getenv("KAS_SECRET")
 	if len(klayAccessKeyId) == 0 || len(klayAccessKeySecret) == 0 {
-		log.Fatal("Envs KAS_KEY_ID or KAS_SECRET are missing")
+		log.Println("Envs KAS_KEY_ID or KAS_SECRET are missing. Disabled Klaytn fetcher.")
+	} else {
+		fetchers["klay"] = NewKlayFetcher("https://node-api.klaytnapi.com/v1/klaytn",
+			&KlayFetcherOptions{
+				AccessKeyId:     klayAccessKeyId,
+				AccessKeySecret: klayAccessKeySecret,
+			})
 	}
-	fetchers["klay"] = NewKlayFetcher("https://node-api.klaytnapi.com/v1/klaytn",
-		&KlayFetcherOptions{
-			AccessKeyId:     klayAccessKeyId,
-			AccessKeySecret: klayAccessKeySecret,
-		})
 
 	return nil
 }
