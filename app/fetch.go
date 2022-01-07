@@ -8,22 +8,16 @@ import (
 	"github.com/blukat29/evm-explorer/util"
 )
 
-type AddrInfo struct {
-	ExtCodeID string
-}
-
-var addrDB = map[string]*AddrInfo{}
+// extAddr -> extCodeID
+const addrTable = "addr"
 
 func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 	extAddr := req.ExtAddr
 
-	if value, ok, err := storage.Get("addrs", extAddr); err != nil {
+	if value, ok, err := storage.Get(addrTable, extAddr); err != nil {
 		return nil, err
 	} else if ok {
-		info := value.(*AddrInfo)
-		return &AddrResponse{
-			ExtCodeID: info.ExtCodeID,
-		}, nil
+		return &AddrResponse{ExtCodeID: string(value)}, nil
 	}
 
 	net, addr, ok := util.DecodeExtId(extAddr)
@@ -44,10 +38,6 @@ func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 		return nil, err
 	}
 
-	err = storage.Set("addrs", extAddr, &AddrInfo{
-		ExtCodeID: extCodeID,
-	})
-	return &AddrResponse{
-		ExtCodeID: extCodeID,
-	}, err
+	err = storage.Set(addrTable, extAddr, []byte(extCodeID))
+	return &AddrResponse{ExtCodeID: extCodeID}, err
 }

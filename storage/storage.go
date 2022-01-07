@@ -1,85 +1,101 @@
 package storage
 
-var kvs *CascadeKvStorage
+import (
+	"errors"
+
+	"github.com/dgraph-io/ristretto"
+	"github.com/eko/gocache/cache"
+	"github.com/eko/gocache/store"
+)
+
+var cm *cache.Cache
+var rist *ristretto.Cache
+
+var ristrettoNotFoundError = errors.New("Value not found in Ristretto store")
 
 func Init() error {
-	kvs = NewCascadeKvStorage(
-		NewMemBackend(),
-	)
-	return kvs.Connect()
-}
-
-func Set(table, key string, value interface{}) error {
-	return kvs.Set(table, key, value)
-}
-
-func Get(table, key string) (interface{}, bool, error) {
-	return kvs.Get(table, key)
-}
-
-type KvBackend interface {
-	Connect() error
-	Set(table, key string, value interface{}) error
-	Get(table, key string) (interface{}, bool, error)
-}
-
-type CascadeKvStorage struct {
-	Backends []KvBackend
-}
-
-func NewCascadeKvStorage(backends ...KvBackend) *CascadeKvStorage {
-	c := &CascadeKvStorage{
-		Backends: backends,
-	}
-	return c
-}
-
-func (c *CascadeKvStorage) Connect() error {
-	for _, b := range c.Backends {
-		if err := b.Connect(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (c *CascadeKvStorage) Set(table, key string, value interface{}) error {
-	for _, b := range c.Backends {
-		if err := b.Set(table, key, value); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (c *CascadeKvStorage) Get(table, key string) (interface{}, bool, error) {
-	result, err := c.search(table, key)
+	rStore, err := newRistStore()
 	if err != nil {
-		return "", false, err
-	} else if result == nil {
-		return "", false, nil
+		return err
 	}
 
-	for i := 0; i < result.depth; i++ {
-		if err := c.Backends[i].Set(table, key, result.value); err != nil {
-			return result.value, true, err
-		}
-	}
-	return result.value, true, err
+	cm = cache.New(rStore)
+	return nil
 }
 
-type searchResult struct {
-	value interface{}
-	depth int
+func newRistStore() (store.StoreInterface, error) {
+	// https://github.com/dgraph-io/ristretto#example
+	// https://github.com/dgraph-io/ristretto#config
+	rCache, err := ristretto.NewCache(&ristretto.Config{
+		// 10x the number of items you expect to keep in the cache when full.
+		NumCounters: 1e7,
+		// Here cost == len(value). Thus MaxCost is max memory size.
+		MaxCost:     1 << 29, // 512 MB
+		BufferItems: 64,
+	})
+	if err != nil {
+		return nil, err
+	}
+	rist = rCache
+
+	rStore := store.NewRistretto(rCache, nil)
+	return rStore, nil
 }
 
-func (c *CascadeKvStorage) search(table, key string) (*searchResult, error) {
-	for depth, b := range c.Backends {
-		if value, ok, err := b.Get(table, key); err != nil {
-			return nil, err
-		} else if ok {
-			return &searchResult{value: value, depth: depth}, nil
+func flush() {
+	if rist != nil {
+		// Must Wait(), otherwise subsequent Get() may fail.
+		// https://github.com/eko/gocache/issues/47#issuecomment-648831087
+		// https://github.com/dgraph-io/ristretto#example
+		rist.Wait()
+	}
+}
+
+func Set(table, key string, value []byte) error {
+	ck := cacheKey(table, key)
+	err := cm.Set(ck, value, &store.Options{Cost: int64(len(value))})
+	flush()
+	return err
+}
+
+func Get(table, key string) ([]byte, bool, error) {
+	ck := cacheKey(table, key)
+	value, err := cm.Get(ck)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, false, nil
+		} else {
+			return nil, false, err
 		}
 	}
-	return nil, nil
+
+	switch value.(type) {
+	case []byte:
+		return value.([]byte), true, nil
+	default:
+		return nil, false, errors.New("bad type")
+	}
+}
+
+func Exists(table, key string) bool {
+	_, ok, _ := Get(table, key)
+	return ok
+}
+
+func cacheKey(table, key string) string {
+	return table + ":" + key
+}
+
+func isNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	switch err.Error() {
+	// https://github.com/eko/gocache/blob/v1.2.0/store/ristretto.go#L49
+	case "Value not found in Ristretto store":
+		return true
+	default:
+		return false
+	}
 }

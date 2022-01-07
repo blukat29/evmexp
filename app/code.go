@@ -6,15 +6,23 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/blukat29/evm-explorer/storage"
 	"github.com/blukat29/evm-explorer/util"
 )
 
-type BinaryCode struct {
-	Format string
-	Binary []byte // not hex; binary data.
-}
+// extCodeID -> binary
+const codeTable = "code"
 
-var codeDB = map[string]*BinaryCode{}
+func LoadCodeID(extCodeID string) ([]byte, error) {
+	code, ok, err := storage.Get(codeTable, extCodeID)
+	if err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, &NotFoundError{Message: "no such code"}
+	} else {
+		return code, nil
+	}
+}
 
 func SaveCode(format, codeHex string) (string, error) {
 	codeHex = strings.TrimSpace(codeHex)
@@ -29,13 +37,9 @@ func SaveCode(format, codeHex string) (string, error) {
 	codeID := fmt.Sprintf("%x", sha256.Sum256(binary))
 	extCodeID := util.EncodeExtId(format, codeID)
 
-	if _, ok := codeDB[extCodeID]; !ok {
-		codeDB[extCodeID] = &BinaryCode{
-			Format: format,
-			Binary: binary,
-		}
+	if !storage.Exists(codeTable, extCodeID) {
+		storage.Set("code", extCodeID, binary)
 	}
-
 	return extCodeID, nil
 }
 
