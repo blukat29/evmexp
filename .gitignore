@@ -2,6 +2,7 @@
 ## This project
 
 evexp
+*.db
 
 ## Go
 
