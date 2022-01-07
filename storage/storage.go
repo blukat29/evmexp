@@ -2,16 +2,15 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/dgraph-io/ristretto"
 	"github.com/eko/gocache/cache"
 	"github.com/eko/gocache/store"
 )
 
-var cm *cache.Cache
+var cm cache.CacheInterface
 var rist *ristretto.Cache
-
-var ristrettoNotFoundError = errors.New("Value not found in Ristretto store")
 
 func Init() error {
 	rStore, err := newRistStore()
@@ -19,7 +18,16 @@ func Init() error {
 		return err
 	}
 
-	cm = cache.New(rStore)
+	sStore, err := newSqliteStore("data.db")
+	if err != nil {
+		return err
+	}
+	fmt.Println(sStore.GetType())
+
+	cm = cache.NewChain(
+		cache.New(rStore),
+		cache.New(sStore),
+	)
 	return nil
 }
 
@@ -94,8 +102,8 @@ func isNotFoundError(err error) bool {
 	switch err.Error() {
 	// https://github.com/eko/gocache/blob/v1.2.0/store/ristretto.go#L49
 	case "Value not found in Ristretto store":
+	case "Value not found in SQLite store":
 		return true
-	default:
-		return false
 	}
+	return false
 }
