@@ -1,7 +1,9 @@
 package deco
 
 import (
+	"fmt"
 	"io"
+	"log"
 	"os/exec"
 )
 
@@ -19,5 +21,11 @@ func RunWorker(code string) ([]byte, error) {
 		stdin.Close()
 	}()
 
-	return cmd.Output()
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Println("----- worker output -----\n", string(out), "\n----------\n")
+		return nil, fmt.Errorf("worker error: %s", err)
+	} else {
+		return out, nil
+	}
+
 }

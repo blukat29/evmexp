@@ -29,14 +29,13 @@ RUN apt-get update && apt-get install -y \
     sqlite3
 RUN pip3 install litecli
 
-
 WORKDIR /app
 
-COPY --from=backend /app/evexp ./evexp
-COPY --from=backend /app/worker ./worker
-COPY --from=frontend /app/dist ./front/dist
-
+COPY ./worker ./worker
 RUN pip3 install -r ./worker/requirements.txt
+
+COPY --from=backend /app/evexp ./evexp
+COPY --from=frontend /app/dist ./front/dist
 
 RUN ln -s /app/evexp /usr/bin/evexp
 
