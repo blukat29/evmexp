@@ -3,6 +3,7 @@
 
 evexp
 *.db
+data/
 
 ## Go
 
