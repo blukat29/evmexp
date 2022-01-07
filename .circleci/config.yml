@@ -1,4 +1,5 @@
 # https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
+# https://circleci.com/blog/using-circleci-workflows-to-replicate-docker-hub-automated-builds/
 version: 2
 jobs:
   build:
@@ -13,4 +14,12 @@ jobs:
           name: Build image
           command: |
             docker build -t evmexp .
+      - run:
+          name: Upload image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "$DOCKERHUB_TOKEN" | docker login -u blukat29 --password-stdin
+              docker tag evmexp "blukat29/evmexp:${CIRCLE_SHA1}"
+              docker push "blukat29/evmexp:${CIRCLE_SHA1}"
+            fi
 
