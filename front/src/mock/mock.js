@@ -5,6 +5,7 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
 import * as sampleContract from './eth_usdt.json';
+import * as sampleBinary from './eth_usdt_bin.json';
 
 function isDevServer() {
   return (typeof webpackHotUpdate == 'function');
@@ -44,6 +45,7 @@ function installMock() {
     .reply(() => delayed(1000, 200, {
       error: null,
       extCodeID: "evm_generic-6d967f98f2f3843065688dc2065248e3686b56fc0b6ddfa82007df016148becb",
+      binary: sampleBinary.default.binary,
     }));
 
   mock.onGet(/\/api\/addr\/\w+/)
