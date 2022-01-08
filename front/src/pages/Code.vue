@@ -15,7 +15,10 @@
             <div class="text-h6" v-else>Binary code</div>
 
             <div class="text-subtitle2">
-              <span v-if="extCodeID">code: {{ extCodeID }}</span>
+              <q-expansion-item v-if="extCodeID" :label="'code: ' + extCodeID"
+                caption="click to view binary code" dense>
+                <pre class="binarycode">{{ binary }}</pre>
+              </q-expansion-item>
               <span v-else-if="errorCodeID" class="text-negative">
                 Error: {{ errorCodeID }}
               </span>
@@ -92,6 +95,16 @@
 pre {
   margin: 0.3em;
 }
+
+.binarycode {
+  max-width: 100%;
+  height: auto;
+  max-height: 4em;
+  overflow: auto;
+  background-color: #eeeeee;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
 </style>
 
 <script>
@@ -119,6 +132,8 @@ export default {
       extAddr: "",
 
       extCodeID: "",
+      binary: "",
+      showBinary: false,
       errorCodeID: null,
 
       codeLoaded: false,
@@ -144,6 +159,7 @@ export default {
       codePromise = axios.get('/api/addr/' + vm.extAddr)
         .then(function(res) {
           vm.extCodeID = res.data.extCodeID;
+          vm.binary = res.data.binary;
           return vm.extCodeID;
         })
         .catch(function(err) {
