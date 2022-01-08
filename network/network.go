@@ -6,6 +6,8 @@ import (
 )
 
 type Fetcher interface {
+	// Returns hex-encoded raw binary code.
+	// In Ethereum-like networks, leading '0x' must be deleted.
 	GetCode(addr string) ([]byte, error)
 }
 

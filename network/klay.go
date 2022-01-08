@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/blukat29/evm-explorer/util"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -56,5 +57,5 @@ func (f *KlayFetcher) GetCode(addr string) ([]byte, error) {
 
 	var result string
 	err = client.Call(&result, "klay_getCode", addr, "latest")
-	return []byte(result), err
+	return []byte(util.RemoveHexPrefix(result)), err
 }

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/hex"
 	"log"
 
 	"github.com/blukat29/evm-explorer/network"
@@ -14,10 +15,10 @@ const addrTable = "addr"
 func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 	extAddr := req.ExtAddr
 
-	if value, ok, err := storage.Get(addrTable, extAddr); err != nil {
+	if resp, ok, err := fetchAddrFromCache(extAddr); err != nil {
 		return nil, err
 	} else if ok {
-		return &AddrResponse{ExtCodeID: string(value)}, nil
+		return resp, nil
 	}
 
 	net, addr, ok := util.DecodeExtId(extAddr)
@@ -28,16 +29,37 @@ func FetchAddr(req *AddrRequest) (*AddrResponse, error) {
 	if fetcher == nil {
 		return nil, &InputError{Message: "not supported network"}
 	}
-	code, err := fetcher.GetCode(addr)
+	binaryHex, err := fetcher.GetCode(addr)
 	if err != nil {
 		log.Println(err)
 		return nil, &NetworkError{Message: "cannot fetch contract code"}
 	}
-	extCodeID, err := SaveCode("evm_generic", string(code))
+	extCodeID, err := SaveCode("evm_generic", string(binaryHex))
 	if err != nil {
 		return nil, err
 	}
 
 	err = storage.Set(addrTable, extAddr, []byte(extCodeID))
-	return &AddrResponse{ExtCodeID: extCodeID}, err
+	return &AddrResponse{
+		ExtCodeID: extCodeID,
+		Binary:    string(binaryHex),
+	}, err
+}
+
+func fetchAddrFromCache(extAddr string) (*AddrResponse, bool, error) {
+	if value, ok, err := storage.Get(addrTable, extAddr); ok {
+		extCodeID := string(value)
+		if binary, err := LoadCodeID(extCodeID); err != nil {
+			// Could be some race condition (saved extCodeID but no code yet)
+			// Force re-fetch
+			return nil, false, nil
+		} else {
+			return &AddrResponse{
+				ExtCodeID: extCodeID,
+				Binary:    hex.EncodeToString(binary),
+			}, true, nil
+		}
+	} else {
+		return nil, false, err
+	}
 }

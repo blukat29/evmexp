@@ -39,6 +39,7 @@ type AddrRequest struct {
 type AddrResponse struct {
 	Response
 	ExtCodeID string `json:"extCodeID"`
+	Binary    string `json:"binary"`
 }
 
 type CodeUploadRequest struct {

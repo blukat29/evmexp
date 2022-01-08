@@ -26,9 +26,7 @@ func LoadCodeID(extCodeID string) ([]byte, error) {
 
 func SaveCode(format, codeHex string) (string, error) {
 	codeHex = strings.TrimSpace(codeHex)
-	if strings.HasPrefix(codeHex, "0x") {
-		codeHex = codeHex[2:]
-	}
+	codeHex = util.RemoveHexPrefix(codeHex)
 	binary, err := hex.DecodeString(codeHex)
 	if err != nil {
 		return "", &InputError{Message: "malformed binary"}
