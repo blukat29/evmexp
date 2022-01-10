@@ -5,7 +5,8 @@ set -e
 mkdir -p data
 mkdir -p data/cache
 
-docker run --rm -p 8000:8000 \
+docker run -p 8000:8000 \
+    -d --name evm \
     --user $(id -u):$(id -g) \
     -v /etc/passwd:/etc/passwd:ro \
     -v /etc/group:/etc/group:ro \
@@ -14,4 +15,4 @@ docker run --rm -p 8000:8000 \
     -e XDG_CACHE_HOME="/app/data/cache" \
     -e KAS_KEY_ID \
     -e KAS_SECRET \
-    -it evmexp "$@"
+    evmexp "$@"
