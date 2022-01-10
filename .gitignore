@@ -4,6 +4,7 @@
 evexp
 *.db
 data/
+*.env
 
 ## Go
 
