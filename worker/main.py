@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
-import sys
 import json
+import logging
+import sys
 
+import coloredlogs
 from panoramix import decompiler
+
+coloredlogs.install(
+    level=logging.INFO,
+    fmt="%(asctime)s %(name)s %(message)s",
+    datefmt="%H:%M:%S.%f",
+    field_styles={"asctime": {"color": "white", "faint": True}},
+)
 
 def deco_code(code):
     code = code.strip()
@@ -21,7 +30,12 @@ def deco(args):
         d = deco_code(args.file.read())
     elif args.stdin:
         d = deco_code(sys.stdin.read())
-    print(json.dumps(d))
+
+    doc = json.dumps(d)
+    if args.output:
+        args.output.write(doc)
+    else:
+        print(doc)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -29,6 +43,8 @@ if __name__ == '__main__':
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('-f', '--file', type=argparse.FileType('r'), help='bytecode file in hex')
     source.add_argument('-i', '--stdin', action='store_true', help='read bytecode in hex from stdin')
+
+    parser.add_argument('-o', '--output', type=argparse.FileType('w'))
 
     args = parser.parse_args()
     deco(args)

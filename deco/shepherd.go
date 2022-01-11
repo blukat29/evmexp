@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -16,7 +17,7 @@ func RunWorker(code string) ([]byte, error) {
 
 	var outb, errb bytes.Buffer
 	cmd.Stdout = &outb
-	cmd.Stderr = &errb
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errb)
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
