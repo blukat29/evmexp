@@ -20,6 +20,8 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               echo "$DOCKERHUB_TOKEN" | docker login -u blukat29 --password-stdin
               docker tag evmexp "blukat29/evmexp:${CIRCLE_SHA1}"
+              docker tag evmexp "blukat29/evmexp:latest"
               docker push "blukat29/evmexp:${CIRCLE_SHA1}"
+              docker push "blukat29/evmexp:latest"
             fi
 
