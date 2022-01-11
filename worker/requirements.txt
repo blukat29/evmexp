@@ -27,7 +27,7 @@ lru-dict==1.1.7
 multiaddr==0.0.9
 multidict==5.2.0
 netaddr==0.8.0
-panoramix-decompiler @ git+https://github.com/blukat29/panoramix@7edab9690324b43c431282683f91d2c080aecf4b
+panoramix-decompiler @ git+https://github.com/blukat29/panoramix@e12e8287bec101454627bff402019f1bff0ab3cd
 parsimonious==0.8.1
 protobuf==3.19.1
 pycryptodome==3.11.0
